@@ -94,7 +94,7 @@ class MyButtonListener implements ActionListener {
       pen.setCanvas(gridCanvas);
     }
     if (event.getSource() == buttonManager.loadButton) {
-      String[] in = loadStrings("export/"+buttonManager.loadFileNameText.getText()+".txt");
+      String[] in = loadStrings(path+buttonManager.loadFileNameText.getText()+".txt");
       if (in == null) {
         buttonManager.loadFileNameText.setText("ないです");
         buttonManager.saveFileNameText.setText("あっ、ない");
