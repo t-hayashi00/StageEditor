@@ -6,7 +6,7 @@ class Palette {
   int h;
   int draw = 0;
 
-  Palette(float posX, float posY, int w, int h) {
+  Palette(final float posX, final float posY, final int w, final int h) {
     this.w = w;
     this.h = h;
     this.posX = posX;
@@ -19,7 +19,7 @@ class Palette {
     }
   }
 
-  void setPalette(float x, float y) {
+  void setPalette(final float x, final float y) {
     if ((x<0||y<0) || (x>=w*32||y>=h*32))return;
     draw = grid[(int)y/32][(int)x/32];
   }

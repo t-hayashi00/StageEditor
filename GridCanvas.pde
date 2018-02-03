@@ -6,10 +6,14 @@ class GridCanvas {
   int h;
 
   // make file
-  GridCanvas(float posX, float posY, int w, int h) {
+  GridCanvas(final float posX, final float posY, final int w, final int h) {
+    this.w = w;
+    this.h = h;
+    this.posX = posX;
+    this.posY = posY;
     if (w < 0 || h < 0) {
-      w = 0;
-      h = 0;
+      this.w = 0;
+      this.h = 0;
     }
     grid = new int[h][w];
     for (int i=0; i<w; i++ ) {
@@ -17,14 +21,10 @@ class GridCanvas {
         grid[j][i] = 0;
       }
     }
-    this.w = w;
-    this.h = h;
-    this.posX = posX;
-    this.posY = posY;
   }
 
   // load file
-  GridCanvas(float posX, float posY, String[] in) {
+  GridCanvas(final float posX, final float posY, final String[] in) {
     this.posX = posX;
     this.posY = posY;
 
@@ -58,12 +58,12 @@ class GridCanvas {
     }
   }
 
-  void setGrid(float x, float y, int draw) {
+  void setGrid(final float x, final float y, final int draw) {
     if ((x<0||y<0) || (x>=w*32||y>=h*32))return;
     grid[(int)y/32][(int)x/32] = draw;
   }
 
-  int getGrid(float x, float y) {
+  int getGrid(final float x, final float y) {
     if ((x<0||y<0) || (x>=w*32||y>=h*32))return -1;
     return grid[(int)y/32][(int)x/32];
   }

@@ -5,7 +5,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 class ButtonManager {
-  ActionListener al;
+  final ActionListener al;
   int posX;
   int posY;
   JLayeredPane pane;
@@ -22,7 +22,7 @@ class ButtonManager {
 
   JButton drawModeButton;
 
-  ButtonManager(float posX, float posY, ActionListener al) {
+  ButtonManager(final float posX, final float posY, final ActionListener al) {
     this.posX = (int)posX;
     this.posY = (int)posY;
     this.al = al;

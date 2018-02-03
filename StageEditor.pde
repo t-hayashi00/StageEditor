@@ -2,17 +2,11 @@ import javax.swing.*;
 import java.awt.*;
 import processing.awt.PSurfaceAWT;
 
-JLayeredPane pane;
-JTextField field;
-JTextArea area;
-
-GridCanvas gridCanvas;
-Palette palette;
-ButtonManager buttonManager;
-boolean prePressed = false;
-boolean redrawReq = false;
-float fromX, fromY;
-String drawMode = "PEN";
+private ButtonManager buttonManager;
+private GridCanvas gridCanvas;
+private Palette palette;
+private Pen pen;
+private String path = "export/";
 
 void setup() {
   frameRate(60);
@@ -21,6 +15,7 @@ void setup() {
   background(228, 255, 255);
   MyButtonListener mbl = new MyButtonListener();
   palette = new Palette(32, 288, 6, 5);
+  pen = new Pen(palette);
   buttonManager = new ButtonManager(32, 48, mbl);
   buttonManager.drawModeButton.setBounds((int)palette.posX+80, (int)palette.posY-48, 96, 33);
   palette.draw();
@@ -33,6 +28,7 @@ void setup() {
 
   smoothCanvas.getFrame().setSize(size[0], size[1]);
 }
+
 int[] loadConfig() {
   int[] size = {928, 576};
   String[] in = loadStrings("config.ini");
@@ -44,12 +40,18 @@ int[] loadConfig() {
   try {
     String[] config = in[0].split("\\s+");
     size[0] = Integer.parseInt(config[1]);
-    if (size[0]<928)size[0] = 928;
-    if (size[0]>displayWidth)size[0] = displayWidth;
+    if (size[0] < 928)size[0] = 928;
+    if (size[0] > displayWidth)size[0] = displayWidth;
     config = in[1].split("\\s+");
     size[1] = Integer.parseInt(config[1]);
     if (size[1]<576)size[1] = 576;
     if (size[1]>displayHeight)size[1] = displayHeight;
+    try {
+      path = in[2].split("\\s+")[1];
+    }
+    catch(ArrayIndexOutOfBoundsException e) {
+      path = "";
+    }
     return size;
   }
   catch(ArrayIndexOutOfBoundsException e) {
@@ -69,7 +71,8 @@ int[] loadConfig() {
 private void makeConfig() {
   PrintWriter outfile = createWriter("config.ini");
   outfile.println("width 928");
-  outfile.print("height 576");
+  outfile.println("height 576");
+  outfile.print("path export/");
   outfile.flush();
   outfile.close();
 }
@@ -78,128 +81,17 @@ void draw() {
   background(228, 255, 255);
   if (gridCanvas!=null) {
     gridCanvas.draw();
-    switch(drawMode) {
-    default://"PEN"
-      drawPen();
-      break;
-    case "LINE":
-      drawLine();
-      break;
-    case "RECT":
-      drawRect();
-      break;
-    }
-    if (mousePressed) {
-      switch(mouseButton) {
-      case LEFT:
-        palette.setPalette(mouseX-palette.posX, (mouseY-palette.posY));
-        break;
-      case RIGHT:
-        if (gridCanvas.getGrid(mouseX-gridCanvas.posX, (mouseY-gridCanvas.posY))>=0) {
-          palette.draw = gridCanvas.getGrid(mouseX-gridCanvas.posX, (mouseY-gridCanvas.posY));
-        }
-        break;
-      case 3://WHEEL
-        gridCanvas.posX+=mouseX-pmouseX;
-        gridCanvas.posY+=mouseY-pmouseY;
-        break;
-      default:
-      }
-    }
-    if (redrawReq) {
-      background(228, 255, 255);
-      redrawReq = false;
-    }
   }
+  pen.draw();
   palette.draw();
   buttonManager.draw();
 }
 
-void drawPen() {
-  if (mousePressed && mouseButton==LEFT) {
-    if (prePressed) {
-      float rx = (mouseX-pmouseX);
-      float ry = (mouseY-pmouseY);
-      final float DIV=sqrt((rx*rx)+(ry*ry))/3;
-      rx = (mouseX-pmouseX)/DIV;
-      ry = (mouseY-pmouseY)/DIV;
-      for (int i=1; i < DIV; i++) {
-        gridCanvas.setGrid((pmouseX+rx*(i+1))-gridCanvas.posX, (pmouseY+ry*(i+1))-gridCanvas.posY, palette.draw);
-      }
-    }
-    gridCanvas.setGrid(mouseX-gridCanvas.posX, mouseY-gridCanvas.posY, palette.draw);
-    prePressed = true;
-  } else {
-    prePressed = false;
-  }
-}
-
-void drawLine() {
-  if (mousePressed && mouseButton==LEFT) {
-    if (!prePressed) {
-      fromX = mouseX;
-      fromY = mouseY;
-    }
-    fill(0);
-    line(fromX, fromY, mouseX, mouseY);
-    prePressed = true;
-  } else {
-    if (prePressed) {
-      float rx = (mouseX-fromX);
-      float ry = (mouseY-fromY);
-      final float DIV=sqrt((rx*rx)+(ry*ry))/3;
-      rx = (mouseX-fromX)/DIV;
-      ry = (mouseY-fromY)/DIV;
-      for (int i=0; i < DIV; i++) {
-        gridCanvas.setGrid((fromX+rx*i)-gridCanvas.posX, (fromY+ry*i)-gridCanvas.posY, palette.draw);
-      }
-      gridCanvas.setGrid(mouseX-gridCanvas.posX, mouseY-gridCanvas.posY, palette.draw);
-    }
-    prePressed = false;
-  }
-}
-
-void drawRect() {
-  if (mousePressed && mouseButton==LEFT) {
-    if (!prePressed) {
-      fromX = mouseX;
-      fromY = mouseY;
-    }
-    noFill();
-    stroke(0);
-    rect(fromX, fromY, mouseX-fromX, mouseY-fromY);
-    prePressed = true;
-  } else {
-    if (prePressed) {
-      final float DIV_X = abs(mouseX-fromX);
-      final float DIV_Y = abs(mouseY-fromY);
-      float rx = (mouseX-fromX) / abs(mouseX-fromX);
-      float ry = (mouseY-fromY) / abs(mouseY-fromY);
-      if (mouseX-fromX==0)rx=0;
-      if (mouseY-fromY==0)ry=0;
-      for (int j = 0; j <= DIV_Y; j++) {
-        for (int i = 0; i <= DIV_X; i++) {
-          gridCanvas.setGrid((fromX+i*rx)-gridCanvas.posX, (fromY+j*ry)-gridCanvas.posY, palette.draw);
-        }
-      }
-      gridCanvas.setGrid(mouseX-gridCanvas.posX, mouseY-gridCanvas.posY, palette.draw);
-    }
-    prePressed = false;
-  }
-}
-
 class MyButtonListener implements ActionListener {
-
-  JTextField textField;
-
-  void setTextField(JTextField textField) {
-    this.textField = textField;
-  }
-
   void actionPerformed(ActionEvent event) {
     if (event.getSource() == buttonManager.createButton) {
       gridCanvas = new GridCanvas(palette.posX + palette.w*32+32, 32, buttonManager.getWidth(), buttonManager.getHeight());
-      redrawReq = true;
+      pen.setCanvas(gridCanvas);
     }
     if (event.getSource() == buttonManager.loadButton) {
       String[] in = loadStrings("export/"+buttonManager.loadFileNameText.getText()+".txt");
@@ -210,7 +102,7 @@ class MyButtonListener implements ActionListener {
       }
       buttonManager.saveFileNameText.setText(buttonManager.loadFileNameText.getText());
       gridCanvas = new GridCanvas(palette.posX + palette.w*32+32, 32, in);
-      redrawReq = true;
+      pen.setCanvas(gridCanvas);
     }
     if (event.getSource() == buttonManager.saveButton) {
       if (gridCanvas==null) {
@@ -231,7 +123,7 @@ class MyButtonListener implements ActionListener {
           return;
         }
       }
-      PrintWriter outfile = createWriter("export/"+buttonManager.saveFileNameText.getText()+".txt");
+      PrintWriter outfile = createWriter(path+buttonManager.saveFileNameText.getText()+".txt");
       try {
         for (int j=0; j<gridCanvas.grid.length; j++) {
           for (int i=0; i<gridCanvas.grid[0].length; i++) {
@@ -252,24 +144,8 @@ class MyButtonListener implements ActionListener {
     }
 
     if (event.getSource() == buttonManager.drawModeButton) {
-      fromX = mouseX;
-      fromY = mouseY;
       String tmp = buttonManager.drawModeButton.getText();
-      switch(tmp) {
-      case "PEN":
-        drawMode = "RECT";
-        buttonManager.drawModeButton.setText("RECT");
-        break;
-      case "RECT":
-        drawMode = "LINE";
-        buttonManager.drawModeButton.setText("LINE");
-        break;
-      case "LINE":
-      default:
-        drawMode = "PEN";
-        buttonManager.drawModeButton.setText("PEN");
-        break;
-      }
+      buttonManager.drawModeButton.setText(pen.changeDrawMode(tmp));
     }
   }
 }
