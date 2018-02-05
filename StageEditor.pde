@@ -6,6 +6,7 @@ private ButtonManager buttonManager;
 private GridCanvas gridCanvas;
 private Palette palette;
 private Pen pen;
+private EffectManager effectManager;
 private String path = "export/";
 
 void setup() {
@@ -17,6 +18,7 @@ void setup() {
   palette = new Palette(32, 288, 6, 5);
   pen = new Pen(palette);
   buttonManager = new ButtonManager(32, 48, mbl);
+  effectManager = new EffectManager();
   buttonManager.drawModeButton.setBounds((int)palette.posX+80, (int)palette.posY-48, 96, 33);
   palette.draw();
   buttonManager.draw();
@@ -77,6 +79,12 @@ private void makeConfig() {
   outfile.close();
 }
 
+void mouseMoved() {
+  if (frameCount%3==0) {
+    effectManager.generateEffect();
+  }
+}
+
 void draw() {
   background(228, 255, 255);
   if (gridCanvas!=null) {
@@ -85,6 +93,7 @@ void draw() {
   pen.draw();
   palette.draw();
   buttonManager.draw();
+  effectManager.draw();
 }
 
 class MyButtonListener implements ActionListener {

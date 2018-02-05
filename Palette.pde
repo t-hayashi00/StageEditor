@@ -28,19 +28,17 @@ class Palette {
     fill(255, 255, 200);
     rect(posX-16, posY-64, w*32+32, h*32+80);
     textAlign(CENTER);
+    colorMode(HSB);
     for (int j=0; j<h; j++) {
       for (int i=0; i<w; i++ ) {
         if ((0 < posX+i*32+32 && 0 < posY+j*32+32) && (posX+i*32<width && posY+j*32<height)) {
-          colorMode(HSB);
           fill(color(255-(grid[j][i]*31+128)%256, 155, 255));
           rect(posX+i*32, posY+j*32, 32, 32);
           fill(0);
           text(grid[j][i], posX+i*32+16, posY+j*32+20);
-          colorMode(RGB);
         }
       }
     }
-    colorMode(HSB);
     fill(color(255-(draw*31+128)%256, 155, 255));
     rect(posX+16, posY-48, 32, 32);
     fill(0);
