@@ -27,7 +27,6 @@ class Palette {
   void draw() {
     fill(255, 255, 200);
     rect(posX-16, posY-64, w*32+32, h*32+80);
-    textAlign(CENTER);
     colorMode(HSB);
     for (int j=0; j<h; j++) {
       for (int i=0; i<w; i++ ) {
@@ -35,14 +34,14 @@ class Palette {
           fill(color(255-(grid[j][i]*31+128)%256, 155, 255));
           rect(posX+i*32, posY+j*32, 32, 32);
           fill(0);
-          text(grid[j][i], posX+i*32+16, posY+j*32+20);
+          text(grid[j][i], posX+i*32+16, posY+j*32+16);
         }
       }
     }
     fill(color(255-(draw*31+128)%256, 155, 255));
     rect(posX+16, posY-48, 32, 32);
     fill(0);
-    text(draw, posX+32, posY-48+20);
+    text(draw, posX+32, posY-48+16);
     colorMode(RGB);
   }
 }

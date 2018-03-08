@@ -1,5 +1,6 @@
 class GridCanvas {
   private int[][] grid;
+  private int gSize = 32;
   float posX;
   float posY;
   int w;
@@ -30,7 +31,7 @@ class GridCanvas {
 
     this.h = in.length;
     for (int i=0; i<in.length; i++) {
-      String[] tmp = in[i].split("\\s+", 0);
+      String[] tmp = in[i].split(",", 0);
       if (this.w < tmp.length) {
         this.w = tmp.length;
       }
@@ -38,7 +39,8 @@ class GridCanvas {
 
     grid = new int[h][w];
     for (int j=0; j<this.h; j++) {
-      String[] tmp = in[j].split("\\s+", 0);
+      in[j] = in[j].replaceAll("\\s++", "");
+      String[] tmp = in[j].split(",", 0);
       for (int i=0; i<this.w; i++) {
         try {
           grid[j][i] = Integer.parseInt(tmp[i]);
@@ -59,28 +61,41 @@ class GridCanvas {
   }
 
   void setGrid(final float x, final float y, final int draw) {
-    if ((x<0||y<0) || (x>=w*32||y>=h*32))return;
-    grid[(int)y/32][(int)x/32] = draw;
+    if ((x<0||y<0) || (x>=w*gSize||y>=h*gSize))return;
+    grid[(int)y/gSize][(int)x/gSize] = draw;
   }
 
   int getGrid(final float x, final float y) {
-    if ((x<0||y<0) || (x>=w*32||y>=h*32))return -1;
-    return grid[(int)y/32][(int)x/32];
+    if ((x<0||y<0) || (x>=w*gSize||y>=h*gSize))return -1;
+    return grid[(int)y/gSize][(int)x/gSize];
+  }
+
+  void setGridSize(int newGSize) {
+    if (4 <= newGSize && newGSize <= 64) {
+      gSize = newGSize;
+    }
+  }
+
+  int getGridSize() {
+    return gSize;
   }
 
   void draw() {
-    textAlign(CENTER);
+    if(gSize < 32)stroke(255 - 255 * gSize/32);
+    textSize(gSize/2);
     colorMode(HSB);
     for (int j=0; j<h; j++) {
       for (int i=0; i<w; i++ ) {
-        if ((0 < posX+i*32+32 && 0 < posY+j*32+32) && (posX+i*32<width && posY+j*32<height)) {
+        if ((0 < posX+i*gSize+gSize && 0 < posY+j*gSize+gSize) && (posX+i*gSize<width && posY+j*gSize<height)) {
           fill(color(255-(grid[j][i]*31+128)%256, 155, 255));
-          rect(posX+i*32, posY+j*32, 32, 32);
+          rect(posX+i*gSize, posY+j*gSize, gSize, gSize);
           fill(0);
-          text(grid[j][i], posX+i*32+16, posY+j*32+20);
+          text(grid[j][i], posX+i*gSize+gSize/2, posY+j*gSize+gSize/2);
         }
       }
     }
+    stroke(0);
+    textSize(16);
     colorMode(RGB);
   }
 }

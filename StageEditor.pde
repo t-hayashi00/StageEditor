@@ -12,7 +12,9 @@ private String path = "export/";
 void setup() {
   frameRate(60);
   size(928, 576);
-
+  
+  textAlign(CENTER, CENTER);
+  textSize(16);
   background(228, 255, 255);
   MyButtonListener mbl = new MyButtonListener();
   palette = new Palette(32, 288, 6, 5);
@@ -96,6 +98,12 @@ void draw() {
   effectManager.draw();
 }
 
+void mouseWheel(MouseEvent event){
+  if (gridCanvas!=null) {
+    gridCanvas.setGridSize(gridCanvas.getGridSize() - event.getCount());
+  }
+}
+
 class MyButtonListener implements ActionListener {
   void actionPerformed(ActionEvent event) {
     if (event.getSource() == buttonManager.createButton) {
@@ -103,7 +111,7 @@ class MyButtonListener implements ActionListener {
       pen.setCanvas(gridCanvas);
     }
     if (event.getSource() == buttonManager.loadButton) {
-      String[] in = loadStrings(path+buttonManager.loadFileNameText.getText()+".txt");
+      String[] in = loadStrings(path+buttonManager.loadFileNameText.getText()+".csv");
       if (in == null) {
         buttonManager.loadFileNameText.setText("ないです");
         buttonManager.saveFileNameText.setText("あっ、ない");
@@ -132,15 +140,17 @@ class MyButtonListener implements ActionListener {
           return;
         }
       }
-      PrintWriter outfile = createWriter(path+buttonManager.saveFileNameText.getText()+".txt");
+      PrintWriter outfile = createWriter(path+buttonManager.saveFileNameText.getText()+".csv");
       try {
         for (int j=0; j<gridCanvas.grid.length; j++) {
-          for (int i=0; i<gridCanvas.grid[0].length; i++) {
-            String space = " ";
-            if (i-gridCanvas.grid[0].length == -1)space = "";
-            outfile.print(gridCanvas.grid[j][i]+space);
+          if (j!=0) {
+            outfile.println("");
           }
-          outfile.println("");
+          for (int i=0; i<gridCanvas.grid[0].length; i++) {
+            String comma = ",";
+            if (i-gridCanvas.grid[0].length == -1)comma = "";
+            outfile.print(gridCanvas.grid[j][i]+comma);
+          }
         }
         outfile.flush();
         outfile.close();

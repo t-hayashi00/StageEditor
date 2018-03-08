@@ -54,8 +54,10 @@ class Pen {
         }
         break;
       case 3://WHEEL
-        gridCanvas.posX += mouseX-pmouseX;
-        gridCanvas.posY += mouseY-pmouseY;
+        if (gridCanvas!=null) {
+          gridCanvas.posX += mouseX-pmouseX;
+          gridCanvas.posY += mouseY-pmouseY;
+        }
         break;
       default:
       }
